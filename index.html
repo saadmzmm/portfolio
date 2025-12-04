@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saad Moazzam – Developer & 3D Artist</title>
+  <meta name="description" content="Full-stack developer and 3D artist creating innovative digital experiences.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+<body data-theme="dark">
+  <div class="bg-gradient"></div>
+  
+  <nav>
+  <div class="logo-text">SM</div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#projects">Projects</a>
+    <a href="#models">3D Models</a>
+    <a href="3d-gallery.html">Interactive Gallery</a>  <!-- ⭐ NEW LINK -->
+    <a href="#contact" class="cta-btn">Get In Touch</a>
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
+  </div>
+</nav
+
+  <section class="hero-section" id="about">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>
+          Hey, I'm <span class="gradient-text">Saad Moazzam</span>
+        </h1>
+        <p>
+          Full-stack developer and 3D artist crafting immersive digital experiences. 
+          I bring ideas to life through code and design, specializing in interactive web applications and stunning 3D visualizations.
+        </p>
+        <div class="hero-buttons">
+          <a href="#projects" class="btn btn-primary">View My Work</a>
+          <a href="#contact" class="btn btn-secondary">Contact Me</a>
+        </div>
+      </div>
+      
+      <div class="canvas-container">
+        <canvas id="hero-canvas"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section class="skills-section" id="skills">
+    <h2 class="section-title">What I Do</h2>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-icon">⚡</div>
+        <h3>Full-Stack Development</h3>
+        <p>Building scalable web applications with React, Node.js, and modern frameworks</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🎨</div>
+        <h3>3D Design & Modeling</h3>
+        <p>Creating stunning 3D models and visualizations using Blender and Three.js</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🚀</div>
+        <h3>Interactive Experiences</h3>
+        <p>Developing engaging user interfaces with smooth animations and interactions</p>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">💡</div>
+        <h3>Problem Solving</h3>
+        <p>Tackling complex challenges with creative solutions and clean code</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="projects-section" id="projects">
+    <h2 class="section-title">Featured Projects</h2>
+    <div class="projects-grid">
+      <div class="project-card">
+        <div class="project-visual" id="project1-canvas"></div>
+        <div class="project-info">
+          <h3>Task Manager Pro</h3>
+          <div class="project-tags">React • Node.js • PostgreSQL</div>
+          <p>A collaborative task management platform with real-time updates and team collaboration features</p>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="project-visual" id="project2-canvas"></div>
+        <div class="project-info">
+          <h3>3D Product Showcase</h3>
+          <div class="project-tags">Three.js • WebGL • Blender</div>
+          <p>Interactive 3D product visualization with photorealistic rendering and smooth animations</p>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="project-visual" id="project3-canvas"></div>
+        <div class="project-info">
+          <h3>Data Visualization Dashboard</h3>
+          <div class="project-tags">Python • D3.js • React</div>
+          <p>Real-time analytics dashboard with beautiful charts and interactive data exploration</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="projects-section" id="models" style="background:transparent">
+    <h2 class="section-title">3D Design Models</h2>
+    <div class="gallery-grid">
+      <div class="model-card">
+        <img src="https://i.ibb.co/sdDbmGMz/a-few-pieces-made-by-me-that-are-dropping-soon-thoughts-and-v0-eelkfd2tkx7e1-ezgif-com-webp-to-jpg-c.jpg" alt="3D Model Design 1">
+      </div>
+      <div class="model-card">
+        <img src="https://i.postimg.cc/C5jQjHmP/IMG-0492.jpg" alt="3D Model Design 2">
+      </div>
+    </div>
+    
+    <h3 class="interactive-title">Interactive 3D Previews</h3>
+    <p class="interactive-subtitle">Drag to rotate • Scroll to zoom • Explore the models in 3D</p>
+
+    <div style="text-align: center; margin-top: 60px;">
+  <a href="3d-gallery.html" style="
+    display: inline-block;
+    padding: 20px 40px;
+    background: linear-gradient(135deg, #3b82f6, #a78bfa);
+    color: white;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+    transition: all 0.3s;
+  " onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 40px rgba(59, 130, 246, 0.6)'" 
+     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 30px rgba(59, 130, 246, 0.4)'">
+    🎨 Explore Full 3D Gallery →
+  </a>
+  <p style="color: var(--muted); margin-top: 16px; font-size: 16px;">
+    Interact with all my 3D models in a dedicated gallery
+  </p>
+</div>
+    
+    <div class="interactive-grid">
+      <div class="interactive-card">
+        <canvas id="model-viewer-1"></canvas>
+        <div class="interactive-label">Crystalline Structure</div>
+      </div>
+      <div class="interactive-card">
+        <canvas id="model-viewer-2"></canvas>
+        <div class="interactive-label">Morphing Topology</div>
+      </div>
+      <div class="interactive-card">
+        <canvas id="model-viewer-3"></canvas>
+        <div class="interactive-label">Parametric Design</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-section" id="contact">
+    <h2>Let's Work Together</h2>
+    <p>Have a project in mind? I'm always open to discussing new opportunities and creative ideas.</p>
+    <form id="contactForm">
+      <input type="text" name="name" placeholder="Your Name" required aria-label="Your name">
+      <input type="email" name="email" placeholder="Your Email" required aria-label="Your email">
+      <textarea name="message" rows="5" placeholder="Tell me about your project..." required aria-label="Project description"></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>© 2025 Saad Moazzam • Based in Toronto, Ontario • Available for freelance work</p>
+  </footer>
+
+  <div id="lightbox" class="lightbox">
+    <img src="" alt="Full size model view">
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

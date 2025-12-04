@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Model Gallery - Saad Moazzam</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000000;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+    
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(12px);
+      background: rgba(0, 0, 0, 0.8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 100;
+    }
+    
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+    
+    .back-btn {
+      padding: 12px 24px;
+      background: transparent;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .back-btn:hover {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    /* Hero Section */
+    .hero {
+      padding: 120px 48px 60px;
+      text-align: center;
+      background: radial-gradient(ellipse at 50% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%);
+    }
+    
+    .hero h1 {
+      font-size: 56px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero p {
+      font-size: 20px;
+      color: #a0a0a0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* Gallery Grid */
+    .gallery-container {
+      padding: 60px 48px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 40px;
+    }
+    
+    /* Model Card */
+    .model-viewer-card {
+      background: #111111;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+    }
+    
+    .model-viewer-card:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3);
+      transform: translateY(-4px);
+    }
+    
+    .viewer-canvas {
+      width: 100%;
+      height: 500px;
+      display: block;
+      cursor: grab;
+    }
+    
+    .viewer-canvas:active {
+      cursor: grabbing;
+    }
+    
+    .model-info {
+      padding: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .model-info h3 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+    
+    .model-info p {
+      color: #a0a0a0;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    
+    .controls-hint {
+      display: flex;
+      gap: 16px;
+      font-size: 14px;
+      color: #60a5fa;
+    }
+    
+    .controls-hint span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    /* Loading Spinner */
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      color: #60a5fa;
+    }
+    
+    .spinner {
+      border: 3px solid rgba(59, 130, 246, 0.1);
+      border-top: 3px solid #3b82f6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 12px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Instructions */
+    .instructions {
+      text-align: center;
+      padding: 40px 48px;
+      background: rgba(17, 17, 17, 0.5);
+      border-radius: 20px;
+      margin: 0 48px 60px;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .instructions h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #60a5fa;
+    }
+    
+    .instruction-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin-top: 24px;
+    }
+    
+    .instruction-item {
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .instruction-item h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+    
+    .instruction-item p {
+      color: #a0a0a0;
+      font-size: 14px;
+    }
+    
+    /* Footer */
+    footer {
+      padding: 40px;
+      text-align: center;
+      color: #a0a0a0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero h1 {
+        font-size: 40px;
+      }
+      
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .viewer-canvas {
+        height: 400px;
+      }
+      
+      nav {
+        padding: 20px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="logo-text">SM</a>
+    <a href="index.html" class="back-btn">← Back to Portfolio</a>
+  </nav>
+
+  <section class="hero">
+    <h1>Interactive 3D Gallery</h1>
+    <p>Explore my 3D models. Drag to rotate, scroll to zoom, and experience the details up close.</p>
+  </section>
+
+  <section class="instructions">
+    <h2>How to Interact</h2>
+    <div class="instruction-grid">
+      <div class="instruction-item">
+        <h3>🖱️ Rotate</h3>
+        <p>Click and drag to rotate the model in any direction</p>
+      </div>
+      <div class="instruction-item">
+        <h3>🔍 Zoom</h3>
+        <p>Scroll up/down or pinch to zoom in and out</p>
+      </div>
+      <div class="instruction-item">
+        <h3>📱 Touch</h3>
+        <p>On mobile, swipe to rotate and pinch to zoom</p>
+      </div>
+      <div class="instruction-item">
+        <h3>✨ Auto-Rotate</h3>
+        <p>Models auto-rotate when you're not interacting</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallery-container">
+    <div class="gallery-grid">
+      
+      <!-- Model 1: Cat Box Meme -->
+      <div class="model-viewer-card">
+        <div style="position: relative;">
+          <canvas id="model-1" class="viewer-canvas"></canvas>
+          <div id="loading-1" class="loading">
+            <div class="spinner"></div>
+            <div>Loading model...</div>
+          </div>
+        </div>
+        <div class="model-info">
+          <h3>Cat Box Meme</h3>
+          <p>A playful 3D interpretation featuring detailed textures and smooth geometry.</p>
+          <div class="controls-hint">
+            <span>🖱️ Drag to rotate</span>
+            <span>🔍 Scroll to zoom</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Model 2: Add more models here -->
+      <div class="model-viewer-card">
+        <div style="position: relative;">
+          <canvas id="model-2" class="viewer-canvas"></canvas>
+          <div id="loading-2" class="loading">
+            <div class="spinner"></div>
+            <div>Loading model...</div>
+          </div>
+        </div>
+        <div class="model-info">
+          <h3>Lego Batman Minifigure</h3>
+          <p>A detailed 3D recreation of the iconic Lego Batman minifigure with authentic textures and design.</p>
+          <div class="controls-hint">
+            <span>🖱️ Drag to rotate</span>
+            <span>🔍 Scroll to zoom</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Model 3: Add more models here -->
+      <div class="model-viewer-card">
+        <div style="position: relative;">
+          <canvas id="model-3" class="viewer-canvas"></canvas>
+          <div id="loading-3" class="loading">
+            <div class="spinner"></div>
+            <div>Loading model...</div>
+          </div>
+        </div>
+        <div class="model-info">
+          <h3>Your Model 3</h3>
+          <p>Description of your third 3D model. Replace with your own GLB file.</p>
+          <div class="controls-hint">
+            <span>🖱️ Drag to rotate</span>
+            <span>🔍 Scroll to zoom</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 Saad Moazzam • Interactive 3D Gallery</p>
+  </footer>
+
+  <script>
+    // =====================================================
+    // 3D MODEL VIEWER CLASS
+    // =====================================================
+    class ModelViewer {
+      constructor(canvasId, modelPath, loadingId) {
+        this.canvas = document.getElementById(canvasId);
+        this.loadingElement = document.getElementById(loadingId);
+        
+        if (!this.canvas) {
+          console.error(`Canvas ${canvasId} not found`);
+          return;
+        }
+        
+        // Setup Three.js scene
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(
+          45,
+          this.canvas.clientWidth / this.canvas.clientHeight,
+          0.1,
+          1000
+        );
+        
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: this.canvas,
+          antialias: true,
+          alpha: true
+        });
+        
+        this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setClearColor(0x000000, 0);
+        
+        // Interaction variables
+        this.rotation = { x: 0, y: 0 };
+        this.isDragging = false;
+        this.previousMousePosition = { x: 0, y: 0 };
+        this.autoRotate = true;
+        this.model = null;
+        
+        // Setup
+        this.setupLights();
+        this.setupInteraction();
+        this.camera.position.z = 5;
+        
+        // Load model
+        if (modelPath) {
+          this.loadModel(modelPath);
+        } else {
+          this.createFallbackGeometry();
+        }
+        
+        this.animate();
+      }
+      
+      setupLights() {
+        // Multiple lights for better model visibility
+        const light1 = new THREE.DirectionalLight(0xffffff, 1);
+        light1.position.set(5, 5, 5);
+        
+        const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
+        light2.position.set(-5, -5, 5);
+        
+        const light3 = new THREE.DirectionalLight(0x60a5fa, 0.3);
+        light3.position.set(0, 5, -5);
+        
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        
+        this.scene.add(light1, light2, light3, ambientLight);
+      }
+      
+      loadModel(path) {
+        const loader = new THREE.GLTFLoader();
+        
+        console.log(`Loading model: ${path}`);
+        
+        loader.load(
+          path,
+          (gltf) => {
+            console.log('Model loaded successfully:', path);
+            this.model = gltf.scene;
+            
+            // Apply materials
+            this.model.traverse((child) => {
+              if (child.isMesh) {
+                // Keep original material but enhance it
+                if (child.material) {
+                  child.material.metalness = Math.min(child.material.metalness || 0, 0.5);
+                  child.material.roughness = Math.max(child.material.roughness || 0.5, 0.3);
+                }
+              }
+            });
+            
+            // Auto-scale and center
+            const box = new THREE.Box3().setFromObject(this.model);
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 4 / maxDim;
+            this.model.scale.set(scale, scale, scale);
+            
+            const center = box.getCenter(new THREE.Vector3());
+            this.model.position.sub(center.multiplyScalar(scale));
+            
+            this.scene.add(this.model);
+            
+            // Hide loading indicator
+            if (this.loadingElement) {
+              this.loadingElement.style.display = 'none';
+            }
+          },
+          (xhr) => {
+            const percent = (xhr.loaded / xhr.total) * 100;
+            console.log(`${path}: ${percent.toFixed(0)}% loaded`);
+          },
+          (error) => {
+            console.error('Error loading model:', error);
+            console.error('Path:', path);
+            
+            if (this.loadingElement) {
+              this.loadingElement.innerHTML = '<div style="color: #ef4444;">Failed to load model</div>';
+            }
+            
+            this.createFallbackGeometry();
+          }
+        );
+      }
+      
+      createFallbackGeometry() {
+        // Fallback geometric shape if model fails to load
+        const geometry = new THREE.IcosahedronGeometry(2, 1);
+        const material = new THREE.MeshPhysicalMaterial({
+          color: 0x3b82f6,
+          metalness: 0.9,
+          roughness: 0.1,
+          clearcoat: 1.0
+        });
+        this.model = new THREE.Mesh(geometry, material);
+        this.scene.add(this.model);
+        
+        if (this.loadingElement) {
+          this.loadingElement.style.display = 'none';
+        }
+      }
+      
+      setupInteraction() {
+        // Mouse drag
+        this.canvas.addEventListener('mousedown', (e) => {
+          this.isDragging = true;
+          this.autoRotate = false;
+          this.previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+          if (this.isDragging) {
+            const deltaX = e.clientX - this.previousMousePosition.x;
+            const deltaY = e.clientY - this.previousMousePosition.y;
+            this.rotation.y += deltaX * 0.01;
+            this.rotation.x += deltaY * 0.01;
+            this.previousMousePosition = { x: e.clientX, y: e.clientY };
+          }
+        });
+        
+        document.addEventListener('mouseup', () => {
+          this.isDragging = false;
+        });
+        
+        // Mouse wheel zoom
+        this.canvas.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          this.camera.position.z += e.deltaY * 0.01;
+          this.camera.position.z = Math.max(2, Math.min(15, this.camera.position.z));
+        }, { passive: false });
+        
+        // Touch support
+        this.canvas.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 1) {
+            this.isDragging = true;
+            this.autoRotate = false;
+            this.previousMousePosition = {
+              x: e.touches[0].clientX,
+              y: e.touches[0].clientY
+            };
+          }
+        });
+        
+        this.canvas.addEventListener('touchmove', (e) => {
+          if (this.isDragging && e.touches.length === 1) {
+            const deltaX = e.touches[0].clientX - this.previousMousePosition.x;
+            const deltaY = e.touches[0].clientY - this.previousMousePosition.y;
+            this.rotation.y += deltaX * 0.01;
+            this.rotation.x += deltaY * 0.01;
+            this.previousMousePosition = {
+              x: e.touches[0].clientX,
+              y: e.touches[0].clientY
+            };
+          }
+        });
+        
+        this.canvas.addEventListener('touchend', () => {
+          this.isDragging = false;
+        });
+        
+        // Window resize
+        window.addEventListener('resize', () => {
+          this.camera.aspect = this.canvas.clientWidth / this.canvas.clientHeight;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+        });
+      }
+      
+      animate() {
+        requestAnimationFrame(() => this.animate());
+        
+        if (this.model) {
+          if (this.autoRotate && !this.isDragging) {
+            this.rotation.y += 0.005;
+          }
+          
+          this.model.rotation.x = this.rotation.x;
+          this.model.rotation.y = this.rotation.y;
+        }
+        
+        this.renderer.render(this.scene, this.camera);
+      }
+    }
+    
+    // =====================================================
+    // INITIALIZE ALL MODELS
+    // =====================================================
+    
+    // ⭐ Model 1: Your cat_box_meme.glb
+    new ModelViewer('model-1', 'cat_box_meme.glb', 'loading-1');
+    
+    // ⭐ Model 2: Add your second GLB file here
+    // Replace 'your-model-2.glb' with your actual file name
+    new ModelViewer('model-2', 'lego_batman_minifigure.glb', 'loading-2');
+    
+    // ⭐ Model 3: Add your third GLB file here
+    // Replace 'your-model-3.glb' with your actual file name
+    new ModelViewer('model-3', 'your-model-3.glb', 'loading-3');
+    
+    // ⭐ TO ADD MORE MODELS:
+    // 1. Copy a model-viewer-card div in the HTML above
+    // 2. Change the canvas id (model-4, model-5, etc.)
+    // 3. Add a new ModelViewer here with your GLB path
+    // Example:
+    // new ModelViewer('model-4', 'my-fourth-model.glb', 'loading-4');
+  </script>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLB Debug Test</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #000;
+      color: #fff;
+      font-family: monospace;
+    }
+    #canvas {
+      width: 100%;
+      height: 500px;
+      border: 2px solid #3b82f6;
+      display: block;
+      margin: 20px 0;
+    }
+    .log {
+      background: #111;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      margin: 20px 0;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .log div {
+      margin: 5px 0;
+      padding: 5px;
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    .info { color: #60a5fa; }
+    .warning { color: #fbbf24; }
+    input {
+      padding: 10px;
+      width: 100%;
+      background: #111;
+      border: 2px solid #333;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    button {
+      padding: 12px 24px;
+      background: #3b82f6;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 GLB File Debug Tool</h1>
+  
+  <div>
+    <label>Enter your GLB file path:</label>
+    <input type="text" id="modelPath" value="cat_box_meme.glb" placeholder="e.g., models/cat_box_meme.glb">
+    <button onclick="testLoad()">Test Load</button>
+    <button onclick="testOnlineModel()">Test Online Model (Verify Setup)</button>
+    <button onclick="clearLog()">Clear Log</button>
+  </div>
+
+  <canvas id="canvas"></canvas>
+  
+  <h2>Debug Log:</h2>
+  <div id="log" class="log"></div>
+
+  <h2>Checklist:</h2>
+  <div class="log">
+    <div id="check1" class="info">⏳ Checking THREE.js...</div>
+    <div id="check2" class="info">⏳ Checking GLTFLoader...</div>
+    <div id="check3" class="info">⏳ Checking Canvas...</div>
+    <div id="check4" class="info">⏳ File location...</div>
+  </div>
+
+  <script>
+    const log = document.getElementById('log');
+    const canvas = document.getElementById('canvas');
+    let scene, camera, renderer, model;
+
+    function addLog(message, type = 'info') {
+      const div = document.createElement('div');
+      div.className = type;
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      log.insertBefore(div, log.firstChild);
+      console.log(message);
+    }
+
+    function clearLog() {
+      log.innerHTML = '';
+    }
+
+    // Initial checks
+    function runChecks() {
+      // Check 1: THREE.js
+      if (typeof THREE !== 'undefined') {
+        document.getElementById('check1').className = 'success';
+        document.getElementById('check1').textContent = '✅ THREE.js is loaded (Version: r' + THREE.REVISION + ')';
+        addLog('THREE.js loaded successfully', 'success');
+      } else {
+        document.getElementById('check1').className = 'error';
+        document.getElementById('check1').textContent = '❌ THREE.js NOT loaded!';
+        addLog('ERROR: THREE.js not found!', 'error');
+      }
+
+      // Check 2: GLTFLoader
+      if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader !== 'undefined') {
+        document.getElementById('check2').className = 'success';
+        document.getElementById('check2').textContent = '✅ GLTFLoader is loaded';
+        addLog('GLTFLoader loaded successfully', 'success');
+      } else {
+        document.getElementById('check2').className = 'error';
+        document.getElementById('check2').textContent = '❌ GLTFLoader NOT loaded!';
+        addLog('ERROR: GLTFLoader not found!', 'error');
+      }
+
+      // Check 3: Canvas
+      if (canvas) {
+        document.getElementById('check3').className = 'success';
+        document.getElementById('check3').textContent = '✅ Canvas element found';
+        addLog('Canvas element exists', 'success');
+      } else {
+        document.getElementById('check3').className = 'error';
+        document.getElementById('check3').textContent = '❌ Canvas NOT found!';
+        addLog('ERROR: Canvas not found!', 'error');
+      }
+
+      // Check 4: File location hint
+      document.getElementById('check4').className = 'info';
+      document.getElementById('check4').textContent = '💡 Make sure your GLB file is in the same folder as this HTML file';
+    }
+
+    // Setup Three.js scene
+    function setupScene() {
+      if (!scene) {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setClearColor(0x000000);
+        camera.position.z = 5;
+
+        // Add lights
+        const light1 = new THREE.DirectionalLight(0xffffff, 1);
+        light1.position.set(5, 5, 5);
+        const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
+        light2.position.set(-5, -5, 5);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(light1, light2, ambientLight);
+
+        addLog('Scene setup complete', 'success');
+      }
+    }
+
+    // Test loading the model
+    function testLoad() {
+      const path = document.getElementById('modelPath').value;
+      
+      if (!path) {
+        addLog('Please enter a file path!', 'error');
+        return;
+      }
+
+      addLog('='.repeat(50), 'info');
+      addLog(`Starting to load: ${path}`, 'info');
+      addLog('='.repeat(50), 'info');
+
+      setupScene();
+
+      // Clear previous model
+      if (model) {
+        scene.remove(model);
+        model = null;
+      }
+
+      const loader = new THREE.GLTFLoader();
+
+      addLog('GLTFLoader initialized', 'info');
+      addLog('Attempting to fetch file...', 'info');
+
+      loader.load(
+        path,
+        
+        // Success
+        (gltf) => {
+          addLog('✅ SUCCESS! Model loaded!', 'success');
+          addLog(`Model data received: ${JSON.stringify(Object.keys(gltf))}`, 'success');
+          
+          model = gltf.scene;
+          
+          // Log model info
+          let meshCount = 0;
+          model.traverse((child) => {
+            if (child.isMesh) {
+              meshCount++;
+              addLog(`Found mesh: ${child.name || 'unnamed'}`, 'info');
+            }
+          });
+          addLog(`Total meshes: ${meshCount}`, 'info');
+
+          // Auto-scale
+          const box = new THREE.Box3().setFromObject(model);
+          const size = box.getSize(new THREE.Vector3());
+          addLog(`Model size: ${size.x.toFixed(2)} x ${size.y.toFixed(2)} x ${size.z.toFixed(2)}`, 'info');
+          
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const scale = 4 / maxDim;
+          model.scale.set(scale, scale, scale);
+          addLog(`Applied scale: ${scale.toFixed(2)}`, 'info');
+
+          const center = box.getCenter(new THREE.Vector3());
+          model.position.sub(center.multiplyScalar(scale));
+
+          scene.add(model);
+          addLog('Model added to scene', 'success');
+          
+          animate();
+        },
+        
+        // Progress
+        (xhr) => {
+          if (xhr.lengthComputable) {
+            const percent = (xhr.loaded / xhr.total) * 100;
+            addLog(`Loading progress: ${percent.toFixed(1)}%`, 'info');
+          } else {
+            addLog(`Loaded ${(xhr.loaded / 1024).toFixed(1)} KB`, 'info');
+          }
+        },
+        
+        // Error
+        (error) => {
+          addLog('❌ FAILED TO LOAD MODEL!', 'error');
+          addLog(`Error: ${error.message || error}`, 'error');
+          addLog('', 'error');
+          addLog('Common issues:', 'warning');
+          addLog('1. File path is incorrect (check spelling and location)', 'warning');
+          addLog('2. File is not in same folder as HTML file', 'warning');
+          addLog('3. File name has wrong extension (.glb vs .gltf)', 'warning');
+          addLog('4. File is corrupted or invalid', 'warning');
+          addLog('5. Browser blocking local file access (try using a local server)', 'warning');
+          addLog('', 'warning');
+          addLog('Try:', 'info');
+          addLog('- Move cat_box_meme.glb to the same folder as this HTML file', 'info');
+          addLog('- Check if filename is exactly: cat_box_meme.glb (case sensitive)', 'info');
+          addLog('- Test the online model button to verify your setup works', 'info');
+        }
+      );
+    }
+
+    // Test with online model to verify setup
+    function testOnlineModel() {
+      addLog('='.repeat(50), 'info');
+      addLog('Testing with online model to verify setup...', 'info');
+      addLog('='.repeat(50), 'info');
+
+      setupScene();
+
+      if (model) {
+        scene.remove(model);
+        model = null;
+      }
+
+      const loader = new THREE.GLTFLoader();
+      const onlineURL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb';
+      
+      addLog(`Loading test model from: ${onlineURL}`, 'info');
+
+      loader.load(
+        onlineURL,
+        (gltf) => {
+          addLog('✅ Online model loaded successfully!', 'success');
+          addLog('Your setup is working correctly!', 'success');
+          addLog('The problem is with your local file path/location', 'warning');
+          
+          model = gltf.scene;
+          model.scale.set(0.5, 0.5, 0.5);
+          scene.add(model);
+          animate();
+        },
+        (xhr) => {
+          const percent = (xhr.loaded / xhr.total) * 100;
+          addLog(`Loading: ${percent.toFixed(0)}%`, 'info');
+        },
+        (error) => {
+          addLog('❌ Even online model failed!', 'error');
+          addLog('Your THREE.js or GLTFLoader setup has issues', 'error');
+          addLog('Check that both scripts are loaded correctly in your HTML', 'error');
+        }
+      );
+    }
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      if (model) {
+        model.rotation.y += 0.01;
+      }
+      
+      renderer.render(scene, camera);
+    }
+
+    // Run initial checks
+    window.addEventListener('load', () => {
+      runChecks();
+      addLog('Page loaded. Enter your GLB path and click Test Load', 'info');
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      if (camera && renderer) {
+        camera.aspect = canvas.clientWidth / canvas.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+      }
+    });
+  </script>
+</body>
+</html>
